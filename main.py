@@ -22,8 +22,7 @@ THEMES_COUNT = 6
 def prepare_data(data):
     data.dropna(inplace=True)
 
-    x = list(map(done_text, data.other_speaker.tolist()))
-    x = [i[0] + i[1] for i in zip(x, list(map(done_text, data.friend_response.tolist())))]
+    x = list(map(done_text, data.friend_response.tolist()))
 
     tokenizer = Tokenizer()
     tokenizer.fit_on_texts(x)
@@ -74,8 +73,7 @@ def prepare_dataset_x(data):
     tokenizer = data_processing.load_tokenizer()
     max_words, unic_words_count = data_processing.load_metadata()
 
-    x = list(map(done_text, data.other_speaker.tolist()))
-    x = [i[0] + i[1] for i in zip(x, list(map(done_text, data.friend_response.tolist())))]
+    x = list(map(done_text, data.friend_response.tolist()))
 
     x = tokenizer.texts_to_sequences(x)
 
