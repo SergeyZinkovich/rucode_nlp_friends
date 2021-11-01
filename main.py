@@ -6,7 +6,6 @@ from keras.layers import Dense, Dropout, Activation
 from preprocess_udpipe import done_text
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing import sequence
-from keras.utils import np_utils
 import data_processing
 
 config = configparser.ConfigParser()
@@ -43,7 +42,6 @@ def prepare_data(data):
     theme_dict = data_processing.get_theme_dict()
     for category in data.Category:
         y.append(theme_dict[category])
-    y = keras.utils.np_utils.to_categorical(y, len(theme_dict))
 
     data_processing.save_train_files(x, y, tokenizer, max_words)
 
@@ -58,7 +56,6 @@ def prepare_val_data(data):
     theme_dict = data_processing.get_theme_dict()
 
     y = [theme_dict[i] for i in data.Category]
-    y = keras.utils.np_utils.to_categorical(y, len(theme_dict))
 
     data_processing.save_prepared_dataset(x, y, 'val')
 
@@ -97,7 +94,7 @@ def train(x_train, y_train, x_val, y_val, max_words, unic_words_count):
     model.add(Dense(THEMES_COUNT))
     model.add(Activation('sigmoid'))
 
-    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
     model.fit(x_train, y_train, batch_size=128, epochs=10, validation_data=(x_val, y_val))
 
