@@ -21,8 +21,8 @@ X_TEST_FILENAME = config["DEFAULT"]["X_TEST_FILENAME"]
 
 def get_data():
     train = pd.read_csv(TRAIN_DATASET_FILENAME).sample(frac=1).reset_index(drop=True)
-    val = pd.read_csv(TRAIN_DATASET_FILENAME).sample(frac=1).reset_index(drop=True)
-    test = pd.read_csv(TRAIN_DATASET_FILENAME, index_col=0)
+    val = pd.read_csv(VAL_DATASET_FILENAME).sample(frac=1).reset_index(drop=True)
+    test = pd.read_csv(TEST_DATASET_FILENAME, index_col=0)
     return train, val, test
 
 

@@ -55,7 +55,7 @@ def prepare_val_data(data):
 
     theme_dict = data_processing.get_theme_dict()
 
-    y = [theme_dict[i] for i in data.Category]
+    y = [theme_dict[i] for i in data.label]
 
     data_processing.save_prepared_dataset(x, y, 'val')
 
