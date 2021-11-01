@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import keras
 import configparser
@@ -41,6 +42,7 @@ def prepare_data(data):
     theme_dict = data_processing.get_theme_dict()
     for category in data.Category:
         y.append(theme_dict[category])
+    y = np.array(y)
 
     data_processing.save_train_files(x, y, tokenizer, max_words)
 
@@ -55,6 +57,7 @@ def prepare_val_data(data):
     theme_dict = data_processing.get_theme_dict()
 
     y = [theme_dict[i] for i in data.label]
+    y = np.array(y)
 
     data_processing.save_prepared_dataset(x, y, 'val')
 
