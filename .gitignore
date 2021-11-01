@@ -1,0 +1,9 @@
+venv/
+lstm_model/
+input/
+output/
+__pycache__/
+.idea/*
+
+*.model
+*.rar
