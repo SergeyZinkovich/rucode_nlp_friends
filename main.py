@@ -8,6 +8,8 @@ from preprocess_udpipe import done_text
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing import sequence
 import data_processing
+import gensim
+import zipfile
 
 config = configparser.ConfigParser()
 config.read("config.ini")
@@ -25,18 +27,31 @@ def prepare_data(data):
 
     x = list(map(done_text, data.friend_response.tolist()))
 
-    tokenizer = Tokenizer()
-    tokenizer.fit_on_texts(x)
-    x = tokenizer.texts_to_sequences(x)
+    # tokenizer = Tokenizer()
+    # tokenizer.fit_on_texts(x)
+    # x = tokenizer.texts_to_sequences(x)
+
+    with zipfile.ZipFile('185.zip', 'r') as archive:
+        stream = archive.open('model.bin')
+        w2v_model = gensim.models.KeyedVectors.load_word2vec_format(stream, binary=True)
+    x_vec = []
+    for words in x:
+        x_vec.append([])
+        for w in words:
+            if w not in w2v_model:
+                continue
+            x_vec[-1].append(w2v_model.get_vector(w))
 
     max_words = 0
-    for i in range(len(x)):
-        # if len(x[i]) > 1000:
-        #     x[i] = x[i][:1000]
-        if len(x[i]) > max_words:
-            max_words = len(x[i])
+    for i in range(len(x_vec)):
+        # if len(x_vec[i]) > 1000:
+        #     x_vec[i] = x_vec[i][:1000]
+        if len(x_vec[i]) > max_words:
+            max_words = len(x_vec[i])
 
-    x = sequence.pad_sequences(x, maxlen=max_words)
+    x_vec = np.array(x_vec)
+
+    x_vec = sequence.pad_sequences(x_vec, maxlen=max_words, value=np.zeros(300, dtype='float32'))
 
     y = []
     theme_dict = data_processing.get_theme_dict()
@@ -44,9 +59,9 @@ def prepare_data(data):
         y.append(theme_dict[category])
     y = np.array(y)
 
-    data_processing.save_train_files(x, y, tokenizer, max_words)
+    data_processing.save_train_files(x_vec, y, max_words)
 
-    return x, y, theme_dict, max_words, len(tokenizer.word_counts)
+    return x_vec, y, theme_dict, max_words
 
 
 def prepare_val_data(data):
@@ -73,25 +88,32 @@ def prepare_test(data):
 
 def prepare_dataset_x(data):
     data.fillna('', inplace=True)
-    tokenizer = data_processing.load_tokenizer()
-    max_words, unic_words_count = data_processing.load_metadata()
+    max_words = data_processing.load_metadata()
 
     x = list(map(done_text, data.friend_response.tolist()))
 
-    x = tokenizer.texts_to_sequences(x)
+    with zipfile.ZipFile('185.zip', 'r') as archive:
+        stream = archive.open('model.bin')
+        w2v_model = gensim.models.KeyedVectors.load_word2vec_format(stream, binary=True)
+    x_vec = []
+    for words in x:
+        x_vec.append([])
+        for w in words:
+            if w not in w2v_model:
+                continue
+            x_vec[-1].append(w2v_model.get_vector(w))
 
     # if len(x[0]) > 1000:
     #     x[0] = x[0][:1000]
 
-    x = sequence.pad_sequences(x, maxlen=max_words)
+    x_vec = sequence.pad_sequences(x_vec, maxlen=max_words, value=np.zeros(300, dtype='float32'))
 
-    return x
+    return x_vec
 
 
-def train(x_train, y_train, x_val, y_val, max_words, unic_words_count):
+def train(x_train, y_train, x_val, y_val, max_words):
     model = Sequential()
-    model.add(keras.layers.Embedding(unic_words_count+1, max_words))
-    model.add(keras.layers.LSTM(150, dropout=0.2, recurrent_dropout=0.2))
+    model.add(keras.layers.LSTM(150, input_shape=(max_words, 300), dropout=0.2, recurrent_dropout=0.2))
     model.add(Dense(THEMES_COUNT))
     model.add(Activation('sigmoid'))
 
@@ -119,18 +141,18 @@ def predict(x):
 if __name__ == "__main__":
     train_data, val_data, test_data = data_processing.get_data()
 
-    x_train, y_train, theme_dict, max_words, unic_words_count = prepare_data(train_data)
+    x_train, y_train, theme_dict, max_words = prepare_data(train_data.iloc[:100])
     # x_train, y_train = data_processing.load_prepared_dataset()
-    # max_words, unic_words_count = data_processing.load_metadata()
+    # max_words = data_processing.load_metadata()
     # theme_dict = data_processing.get_theme_dict()
 
-    x_val, y_val = prepare_val_data(val_data)
+    x_val, y_val = prepare_val_data(val_data.iloc[:100])
     # x_val, y_val = data_processing.load_prepared_dataset('val')
 
-    train(x_train, y_train, x_val, y_val, max_words, unic_words_count)
+    train(x_train, y_train, x_val, y_val, max_words)
     # test(x_val, y_val)
 
-    x_test = prepare_test(test_data)
+    # x_test = prepare_test(test_data)
     # x_test = data_processing.load_prepared_dataset('test')
 
-    predict(x_test)
+    # predict(x_test)
