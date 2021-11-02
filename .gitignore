@@ -1,5 +1,6 @@
 venv/
 lstm_model/
+w2v_model/
 input/
 output/
 __pycache__/
