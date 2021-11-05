@@ -21,7 +21,7 @@ THEMES_COUNT = 6
 
 
 def prepare_data(data):
-    data.dropna(inplace=True)
+    data.fillna('', inplace=True)
 
     x = list(map(done_text, data.friend_response.tolist()))
 
@@ -50,7 +50,7 @@ def prepare_data(data):
 
 
 def prepare_val_data(data):
-    data.dropna(inplace=True)
+    data.fillna('', inplace=True)
 
     x = prepare_dataset_x(data)
 
