@@ -1,0 +1,10 @@
+venv/
+lstm_model/
+input/
+output/
+__pycache__/
+w2v_model/
+.idea/*
+
+*.model
+*.rar
