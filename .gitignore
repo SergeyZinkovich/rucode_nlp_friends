@@ -4,6 +4,7 @@ input/
 output/
 __pycache__/
 w2v_model/
+logreg_model/
 .idea/*
 
 *.model
