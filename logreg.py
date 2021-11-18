@@ -62,6 +62,8 @@ def train_nn():
     x_train, x_val, y_train, y_val = train_test_split(x, labels)
 
     model = keras.Sequential()
+    model.add(keras.layers.Dense(32))
+    model.add(keras.layers.Activation('relu'))
     model.add(keras.layers.Dense(12))
     model.add(keras.layers.Activation('relu'))
     model.add(keras.layers.Dense(6))
@@ -69,7 +71,7 @@ def train_nn():
 
     model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-    model.fit(x_train, y_train, batch_size=128, epochs=15, validation_data=(x_val, y_val))
+    model.fit(x, labels, batch_size=128, epochs=40)
     model.save('logreg_model/nn.h5')
 
 
